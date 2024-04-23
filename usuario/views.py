@@ -15,46 +15,35 @@ from .models import Usuario
 
 from .forms import BuscaUsuarioForm
 
+
 class UsuarioListView(LoginRequiredMixin, ListView):
     model = Usuario
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         if self.request.GET:
-            #quando ja tem dados filtrando
+            # quando ja tem dados filtrando
             context['form'] = BuscaUsuarioForm(data=self.request.GET)
         else:
-            #quando acessa sem dados filtrando
+            # quando acessa sem dados filtrando
             context['form'] = BuscaUsuarioForm()
         return context
 
-    def get_queryset(self):                
-        qs = super().get_queryset().all()
-        
-        if self.request.GET:
-            #quando ja tem dados filtrando
-            form = BuscaUsuarioForm(data=self.request.GET)
+    def get_queryset(self):
+
+        if self.request.user.tipo == 'ADMINISTRADOR':
+            qs = super().get_queryset().all()
         else:
-            #quando acessa sem dados filtrando
-            form = BuscaUsuarioForm()
+            qs = super().get_queryset().exclude(tipo="ADMINISTRADOR")
 
-        if form.is_valid():            
-            nome = form.cleaned_data.get('nome')
-            tipo = form.cleaned_data.get('tipo')
-                        
-            if nome:
-                qs = qs.filter(nome__contains=nome)
-
-            if tipo:
-                qs = qs.filter(tipo=tipo)
-            
         return qs
+
 
 class UsuarioCreateView(LoginRequiredMixin, StaffRequiredMixin, CreateView):
     model = Usuario
     fields = ['tipo', 'nome', 'email', 'password', 'is_active']
     success_url = 'usuario_list'
-    
+
     def get_success_url(self):
         messages.success(self.request, 'Usuário cadastrado com sucesso na plataforma!')
         return reverse(self.success_url)
@@ -64,7 +53,7 @@ class UsuarioUpdateView(LoginRequiredMixin, StaffRequiredMixin, UpdateView):
     model = Usuario
     fields = ['tipo', 'nome', 'email', 'is_active']
     success_url = 'usuario_list'
-    
+
     def get_success_url(self):
         messages.success(self.request, 'Dados do usuário atualizados com sucesso na plataforma!')
         return reverse(self.success_url)
@@ -86,4 +75,3 @@ class UsuarioDeleteView(LoginRequiredMixin, StaffRequiredMixin, DeleteView):
         except Exception as e:
             messages.error(request, 'Há dependências ligadas à esse usuário, permissão negada!')
         return redirect(self.success_url)
-

@@ -35,8 +35,10 @@
   			<th>E-mail</th>
   			<th>Ativo</th>
   			<th>Último acesso</th>
-  			<th class="text-center">Editar</th>
-  			<th class="text-center">Excluir</th>
+            {% if user.tipo == "ADMINISTRADOR" %}
+                <th class="text-center">Editar</th>
+                <th class="text-center">Excluir</th>
+            {% endif %}
   		</thead>
   		<tbody>
   			{% for usuario in object_list %}
@@ -51,12 +53,15 @@
 						{% endif %}
 					</td>
 					<td>{{ usuario.last_login|date:"d/m/Y H:i" }}</td>
-					<td class="text-center">
-				          {% bootstrap_button content='' href=usuario.get_absolute_url button_type='link' icon='edit' button_class='btn btn-primary' size='sm' %}
-				    </td>
-				    <td class="text-center">
-				          {% bootstrap_button content='' href=usuario.get_delete_url button_type='link' icon='trash' button_class='btn btn-danger' size='sm' %}
-				    </td>
+
+                    {% if user.tipo == "ADMINISTRADOR" %}
+                        <td class="text-center">
+                              {% bootstrap_button content='' href=usuario.get_absolute_url button_type='link' icon='edit' button_class='btn btn-primary' size='sm' %}
+                        </td>
+                        <td class="text-center">
+                              {% bootstrap_button content='' href=usuario.get_delete_url button_type='link' icon='trash' button_class='btn btn-danger' size='sm' %}
+                        </td>
+                    {% endif %}
 				</tr>
 			{% endfor %}
   		</tbody>
